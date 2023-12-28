@@ -25,6 +25,7 @@
 		"@typescript-eslint/eslint-plugin": "^6.0.0",
 		"@typescript-eslint/parser": "^6.0.0",
 		"autoprefixer": "^10.4.16",
+		"drizzle-kit": "^0.20.9",
 		"eslint": "^8.56.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.35.1",
@@ -46,9 +47,11 @@
 		"bits-ui": "^0.11.8",
 		"clsx": "^2.0.0",
 		"cmdk-sv": "^0.0.12",
+		"drizzle-orm": "^0.29.2",
 		"epubjs": "^0.3.93",
 		"radix-icons-svelte": "^1.2.1",
 		"tailwind-merge": "^2.2.0",
-		"tailwind-variants": "^0.1.19"
+		"tailwind-variants": "^0.1.19",
+		"tauri-plugin-sql-api": "github:tauri-apps/tauri-plugin-sql#v1"
 	}
 }
