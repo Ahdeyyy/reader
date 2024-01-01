@@ -61,3 +61,20 @@ export const flyAndScale = (
     };
 };
 
+
+export function debounce<T extends (...args: any[]) => unknown>(f: T, wait: number, immediate: boolean) {
+    let timeout: any
+    return (...args: unknown[]) => {
+        const later = () => {
+            timeout = null
+            if (!immediate) f(...args)
+        }
+        const callNow = immediate && !timeout
+        clearTimeout(timeout)
+        timeout = setTimeout(later, wait)
+        if (callNow) f(...args)
+    }
+}
+
+
+export declare function debounce2<T extends (...args: unknown[]) => unknown>(fn: T, wait?: number): (...args: Parameters<T>) => void;

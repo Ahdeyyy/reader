@@ -69,6 +69,26 @@ export async function getCatalogueStore() {
                 }
             }
         },
+        edit: async (item: Catalogue) => {
+            // console.log(item);
+            const result = await db.execute("UPDATE catalogues SET title=$1 WHERE id=$2", [item.title, item.id]);
+            // console.log(result);
+            if (result.rowsAffected === 1) {
+                value[indexOfCatalogue(value, item)] = item;
+                return {
+                    status: "success",
+                    message: "Catalogue edited"
+                }
+            } else {
+                console.error("Failed to edit catalogue");
+                return {
+                    status: "error",
+                    message: "Failed to edit catalogue"
+
+                }
+            }
+
+        }
     }
 }
 

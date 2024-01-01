@@ -10,7 +10,8 @@
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { confirm } from '@tauri-apps/api/dialog';
-	import * as Command from '$lib/components/ui/command';
+
+	import HomeNav from '$lib/components/custom/homeNav.svelte';
 	import {
 		getBookStore,
 		getCatalogueStore,
@@ -26,6 +27,7 @@
 	import { flip } from 'svelte/animate';
 	import { fly } from 'svelte/transition';
 	import { Cross1 } from 'radix-icons-svelte';
+	import SearchCatalogue from '$lib/components/custom/searchCatalogue.svelte';
 
 	type ToastData = {
 		title: string;
@@ -134,6 +136,7 @@
 		const metadata = await book.loaded.metadata;
 		const cover_url = await book.coverUrl();
 		// console.log((await book.loaded.navigation).toc);
+
 		const description = metadata.description;
 		aboutBook.title = metadata.title;
 		aboutBook.cover_url = cover_url ?? '';
@@ -163,7 +166,7 @@
 			}
 		}
 
-		console.log(openCommand);
+		// console.log(openCommand);
 
 		function handleKeydown(e: KeyboardEvent) {
 			if (e.key === 'j' && (e.metaKey || e.ctrlKey)) {
@@ -180,119 +183,96 @@
 	let currentTab = $state('1');
 </script>
 
-<main class="container mx-auto p-8">
-	<Tabs.Root bind:value={currentTab} class="w-full">
-		<Tabs.List class="flex w-full flex-nowrap justify-start gap-2  overflow-x-auto">
+<HomeNav>
+	<main class="">
+		<Tabs.Root bind:value={currentTab} class="w-full">
+			<Tabs.List class="flex w-full flex-nowrap justify-start gap-2 overflow-x-auto">
+				{#each catalogueStore?.value! as catalogue}
+					<Tabs.Trigger value={catalogue.id!.toString()}>{catalogue.title}</Tabs.Trigger>
+				{/each}
+			</Tabs.List>
 			{#each catalogueStore?.value! as catalogue}
-				<Tabs.Trigger value={catalogue.id!.toString()}>{catalogue.title}</Tabs.Trigger>
-			{/each}
-		</Tabs.List>
-		{#each catalogueStore?.value! as catalogue}
-			<Tabs.Content value={catalogue.id!.toString()}>
-				<section class="space-y-4">
-					<div class="flex items-center justify-between gap-3 self-center p-6">
-						<p class="text-sm text-muted-foreground">
-							Press
-							<kbd
-								class="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-sm font-medium text-muted-foreground opacity-100"
-							>
-								<span class="text-sm">⌘</span> + j
-							</kbd>
-							to search
-						</p>
-						{#if currentTab === catalogue.id!.toString()}
-							<Command.Dialog bind:open={openCommand}>
-								<Command.Input placeholder="search..." />
-								<Command.List>
-									<Command.Empty>No results found.</Command.Empty>
-									<Command.Group heading="Suggestions">
-										{#each bookStore?.getByCatalogue(catalogue.id!) || [] as book}
-											<Command.Item>
-												<a href="/book{book.url}">
-													<div>
-														<p>{book.title}</p>
-														<p>{book.author}</p>
-													</div>
-												</a>
-											</Command.Item>
-										{/each}
-									</Command.Group>
-								</Command.List>
-							</Command.Dialog>
-						{/if}
-						<Button on:click={async () => await addBook(catalogue.id!)} variant="ghost" class="">
-							<Plus class="aspect-square w-6 stroke-2" />
-						</Button>
-					</div>
-					<div class="grid grid-cols-2 gap-3 md:grid-cols-2 lg:grid-cols-4">
-						{#each bookStore?.getByCatalogue(catalogue.id!) || [] as book}
-							<Card.Root
-								class="relative flex h-96 flex-col items-center gap-3 self-center p-4 text-center"
-							>
-								<Card.Content>
-									{#await getBookImgUrl(book.url)}
-										<Skeleton class="mx-auto mb-4 h-40 w-32" />
-									{:then url}
-										{#if url}
-											<img
-												class="mx-auto mb-4 aspect-[200/250] h-40 w-32 object-cover"
-												height="250"
-												width="200"
-												src={url}
-												alt="book cover"
-											/>
-										{:else}
-											<Skeleton class="mx-auto mb-4 h-40 w-32" />
-										{/if}
-									{:catch error}
-										<p>{error}</p>
-									{/await}
-
-									<h3 class="max-h-16 overflow-hidden text-balance text-center font-semibold">
-										{book.title}
-									</h3>
-									<p class="mt-1 text-sm text-gray-500">{book.author}</p>
-									<div class="absolute bottom-6 left-2 flex w-full justify-between p-4">
-										<Button variant="default" href="/book{book.url}" class="w-3/4">Read</Button>
-										<DropdownMenu.Root>
-											<DropdownMenu.Trigger>
-												<DotsVertical class="aspect-square w-6" />
-											</DropdownMenu.Trigger>
-											<DropdownMenu.Content>
-												<DropdownMenu.Group>
-													<DropdownMenu.Item
-														on:click={async () => {
-															await openAbout(book.url);
-														}}>About</DropdownMenu.Item
-													>
-													<DropdownMenu.Item
-														on:click={async () => {
-															await removeBook(book);
-														}}>Remove</DropdownMenu.Item
-													>
-												</DropdownMenu.Group>
-											</DropdownMenu.Content>
-										</DropdownMenu.Root>
-									</div>
-								</Card.Content>
-							</Card.Root>
-						{:else}
-							<div class="flex gap-3 mt-8">
-								<p class="text-gray-400">No books in this category</p>
-								<Button
-									on:click={async () => await addBook(catalogue.id!)}
-									class="ml-auto shadow-md border-primary border-b-2 border-r-2 active:border-0 active:border-t-2 active:border-l-2"
-									>Add Book</Button
+				<Tabs.Content value={catalogue.id!.toString()}>
+					<section class="">
+						<div class="mb-4 mt-2 flex items-center justify-between gap-3 self-center py-3">
+							{#if currentTab === catalogue.id!.toString()}
+								<SearchCatalogue books={bookStore?.getByCatalogue(catalogue.id!) || []} />
+							{/if}
+							<Button on:click={async () => await addBook(catalogue.id!)} variant="ghost" class="">
+								<Plus class="aspect-square w-6 stroke-2" />
+							</Button>
+						</div>
+						<div class="grid grid-cols-2 gap-3 md:grid-cols-2 lg:grid-cols-4">
+							{#each bookStore?.getByCatalogue(catalogue.id!) || [] as book}
+								<Card.Root
+									class="relative flex h-96 flex-col items-center gap-3 self-center p-4 text-center"
 								>
-							</div>
-						{/each}
-					</div>
-				</section>
-			</Tabs.Content>
-		{/each}
-	</Tabs.Root>
-</main>
+									<Card.Content>
+										{#await getBookImgUrl(book.url)}
+											<Skeleton class="mx-auto mb-4 h-40 w-32" />
+										{:then url}
+											{#if url}
+												<img
+													class="mx-auto mb-4 aspect-[200/250] h-40 w-32 object-cover"
+													height="250"
+													width="200"
+													src={url}
+													alt="book cover"
+												/>
+											{:else}
+												<Skeleton class="mx-auto mb-4 h-40 w-32" />
+											{/if}
+										{:catch error}
+											<p>{error}</p>
+										{/await}
 
+										<h3 class="max-h-16 overflow-hidden text-balance text-center font-semibold">
+											{book.title}
+										</h3>
+										<p class="mt-1 text-sm text-gray-500">{book.author}</p>
+										<div class="absolute bottom-6 left-2 flex w-full justify-between p-4">
+											<Button variant="default" href="/book{book.url}" class="w-3/4">Read</Button>
+											<DropdownMenu.Root>
+												<DropdownMenu.Trigger>
+													<DotsVertical class="aspect-square w-6" />
+												</DropdownMenu.Trigger>
+												<DropdownMenu.Content>
+													<DropdownMenu.Group>
+														<DropdownMenu.Item
+															on:click={async () => {
+																await openAbout(book.url);
+															}}>About</DropdownMenu.Item
+														>
+														<DropdownMenu.Item
+															on:click={async () => {
+																await removeBook(book);
+															}}>Remove</DropdownMenu.Item
+														>
+													</DropdownMenu.Group>
+												</DropdownMenu.Content>
+											</DropdownMenu.Root>
+										</div>
+									</Card.Content>
+								</Card.Root>
+							{:else}
+								<div class="flex gap-3 mt-8">
+									<p class="text-gray-400">No books in this catalogue</p>
+									<Button
+										on:click={async () => await addBook(catalogue.id!)}
+										class="ml-auto shadow-md border-primary border-b-2 border-r-2 active:border-0 active:border-t-2 active:border-l-2"
+										>Add Book</Button
+									>
+								</div>
+							{/each}
+						</div>
+					</section>
+				</Tabs.Content>
+			{/each}
+		</Tabs.Root>
+	</main>
+</HomeNav>
+
+<!-- dialog for books about -->
 <Dialog.Root bind:open={openDialog}>
 	<Dialog.Content>
 		<Dialog.Header>
@@ -335,6 +315,8 @@
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>
+
+<!-- Toast -->
 
 <div
 	class="fixed right-0 top-0 z-50 m-4 flex flex-col items-end gap-2 md:bottom-0 md:top-auto"
