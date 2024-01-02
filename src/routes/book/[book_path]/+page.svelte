@@ -21,11 +21,6 @@
 
 	const book = $state(new Book(convertFileSrc(path), {}));
 
-	const location = localStorage.getItem(`${path}-location`);
-	if (location) {
-		book.locations.load(location);
-	}
-
 	const renditionOpts: RenditionOptions = {
 		flow,
 		width: '100%',
@@ -35,8 +30,14 @@
 
 	const rendition = book.renderTo('area', renditionOpts);
 
+	const location = localStorage.getItem(`${path}-location`);
 	let toc = $state<NavItem[]>([]);
 
+	if (location) {
+		book.locations.load(location);
+
+		book.rendition.display();
+	}
 	// let current_page: number = $state(0);
 	// let total_pages: number = $state(0);
 	const rtl = false;
@@ -59,16 +60,26 @@
 	);
 
 	book.loaded.navigation.then((data) => {
-		console.log(data.toc);
 		toc = data.toc;
+	});
+	rendition.on('locationChanged', async (location) => {
+		await book.locations.generate(1024); // Example using 1024 characters per page
+
+		localStorage.setItem(`${path}-location`, book.locations.save());
+		// console.log(book.locations.save());
+		// current_page = location.start.displayed.page;
+		// total_pages = location.end.displayed.page;
 	});
 
 	$effect(() => {
-		(async () => {
-			await rendition.display();
-		})();
+		// (async () => {
+		// 	await rendition.display();
+		// })();
+
+		// console.log(document.documentElement.addEventListener);
 
 		document.addEventListener('keyup', async (event: KeyboardEvent) => {
+			// console.log(event.target);
 			if (event.key === 'ArrowLeft') {
 				await rendition.prev();
 			} else if (event.key === 'ArrowRight') {
@@ -78,21 +89,34 @@
 			}
 		});
 
-		document.getElementById('area')!.addEventListener('keyup', async (event: KeyboardEvent) => {
-			if (event.key === 'ArrowLeft') {
-				await rendition.prev();
-			} else if (event.key === 'ArrowRight') {
-				await rendition.next();
-			} else if (event.key === 'ArrowUp') {
-				console.log(rendition.currentLocation());
-			}
-		});
+		const iframe = document.querySelector('iframe');
+
+		// if the iframe is clicked on, focus back to the main document
+		// let i = document
+		// 	.querySelector('#area')!
+		// 	.addEventListener('click', () => document.querySelector('main')!.focus());
 
 		// document.documentElement.addEventListener('wheel', (event: WheelEvent) => {
 		// 	console.log('wheeling');
 		// 	onwheel(event);
 		// });
 		// document.onwheel = onwheel;
+
+		// return () => {
+		// 	document.removeEventListener('keyup', async (event: KeyboardEvent) => {
+		// 		if (event.key === 'ArrowLeft') {
+		// 			await rendition.prev();
+		// 		} else if (event.key === 'ArrowRight') {
+		// 			await rendition.next();
+		// 		} else if (event.key === 'ArrowUp') {
+		// 			console.log(rendition.currentLocation());
+		// 		}
+		// 	});
+
+		// 	document
+		// 		.querySelector('#area')
+		// 		?.removeEventListener('click', () => document.querySelector('main')!.focus());
+		// };
 	});
 </script>
 
