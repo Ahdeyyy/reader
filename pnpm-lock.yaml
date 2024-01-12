@@ -23,9 +23,15 @@ dependencies:
   epubjs:
     specifier: ^0.3.93
     version: 0.3.93
+  mode-watcher:
+    specifier: ^0.1.2
+    version: 0.1.2(svelte@5.0.0-next.26)
   radix-icons-svelte:
     specifier: ^1.2.1
     version: 1.2.1
+  svelte-sonner:
+    specifier: ^0.3.11
+    version: 0.3.11(svelte@5.0.0-next.26)
   tailwind-merge:
     specifier: ^2.2.0
     version: 2.2.0
@@ -6039,6 +6045,14 @@ packages:
     hasBin: true
     dev: false
 
+  /mode-watcher@0.1.2(svelte@5.0.0-next.26):
+    resolution: {integrity: sha512-XTdPCdqC3kqSvB+Q262Kor983YJkkB2Z3vj9uqg5IqKQpOdiz+xB99Jihp8sWbyM67drC7KKp0Nt5FzCypZi2g==}
+    peerDependencies:
+      svelte: ^4.0.0
+    dependencies:
+      svelte: 5.0.0-next.26
+    dev: false
+
   /mri@1.2.0:
     resolution: {integrity: sha512-tzzskb3bG8LvYGFF/mDTpq3jpI6Q9wc3LEmBaghu+DdCssd1FakN7Bc0hVNmEyGq1bq3RgfkCb3cmQLpNPOroA==}
     engines: {node: '>=4'}
@@ -7419,6 +7433,14 @@ packages:
       svelte: 5.0.0-next.26
       typescript: 5.3.3
     dev: true
+
+  /svelte-sonner@0.3.11(svelte@5.0.0-next.26):
+    resolution: {integrity: sha512-TkjgDC7zr0waky81Z9CShXMD+4NQ7UASuRx0BhgQo8ZTDQQYk8X8MzJa3zVtZVa6RYJEiahHBXx8Zt/Ie9G5hg==}
+    peerDependencies:
+      svelte: '>=3 <5'
+    dependencies:
+      svelte: 5.0.0-next.26
+    dev: false
 
   /svelte@5.0.0-next.26:
     resolution: {integrity: sha512-Dd2RfhZT8Ib4mVY2eOOp5r39m6y/H4tfowIOGcotbpqOjWwEpvVHcvLJ9mF/fB+aMaOcljIia4cO62A25zRRiA==}

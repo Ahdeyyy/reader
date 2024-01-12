@@ -1,16 +1,28 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import * as Sheet from '$lib/components/ui/sheet';
-	import { convertFileSrc } from '@tauri-apps/api/tauri';
+	import { Label } from '$lib/components/ui/label';
+	import * as RadioGroup from '$lib/components/ui/radio-group';
 	import type { Book, NavItem } from 'epubjs';
-	import { ListBullet } from 'radix-icons-svelte';
+	import {
+		Gear,
+		ListBullet,
+		Square,
+		ViewHorizontal,
+		ViewNone,
+		ViewVertical
+	} from 'radix-icons-svelte';
 	import { ArrowLeft } from 'radix-icons-svelte';
+	import type { Snippet } from 'svelte';
 
-	let { tableOfContents, book, children } = $props<{
+	let { tableOfContents, book, flow, children } = $props<{
 		tableOfContents: NavItem[];
-		children;
+		children: Snippet;
+		flow: 'auto' | 'paginated' | 'scrolled-doc' | 'scrolled' | undefined;
 		book: Book;
 	}>();
+
+	// console.log(flow);
 </script>
 
 <nav
@@ -57,9 +69,68 @@
 			</Sheet.Header>
 		</Sheet.Content>
 	</Sheet.Root>
-	<Button variant="ghost" href="/">
-		<ArrowLeft class="aspect-square w-6 md:w-12" />
-	</Button>
+	<div>
+		<Sheet.Root>
+			<Sheet.Trigger>
+				<Button variant="outline">
+					<Gear />
+				</Button>
+			</Sheet.Trigger>
+			<Sheet.Content class="overflow-y-scroll" side="right">
+				<Sheet.Header>
+					<Sheet.Title>Settings</Sheet.Title>
+				</Sheet.Header>
+				<!-- <RadioGroup.Root bind:value={flow}>
+					<div class="flex items-center space-x-2">
+						<RadioGroup.Item value="auto" id="auto" />
+						<Label for="auto">auto</Label>
+					</div>
+					<div class="flex items-center space-x-2">
+						<RadioGroup.Item value="paginated" id="paginated" />
+						<Label for="paginated">paginated</Label>
+					</div>
+					<div class="flex items-center space-x-2">
+						<RadioGroup.Item value="scrolled-doc" id="scrolled-doc" />
+						<Label for="scrolled-doc">scrolled doc</Label>
+					</div>
+				</RadioGroup.Root> -->
+
+				<div class="mb-4 mt-4 grid grid-cols-3 gap-3">
+					<Button
+						variant="ghost"
+						on:click={() => {
+							flow = 'auto';
+						}}
+						class={flow === 'auto' ? 'ring-2' : ''}
+					>
+						<Square class="aspect-square w-6 md:w-12" />
+					</Button>
+					<Button
+						variant="ghost"
+						on:click={() => {
+							flow = 'paginated';
+						}}
+						class={flow === 'paginated' ? 'ring-2' : ''}
+					>
+						<ViewVertical class="aspect-square w-6 md:w-12" />
+					</Button>
+					<Button
+						variant="ghost"
+						on:click={() => {
+							flow = 'scrolled-doc';
+						}}
+						class={flow === 'scrolled-doc' ? 'ring-2' : ''}
+					>
+						<ViewHorizontal class="aspect-square w-6 md:w-12" />
+					</Button>
+				</div>
+			</Sheet.Content>
+		</Sheet.Root>
+
+		<Button variant="ghost" href="/">
+			<ArrowLeft class="aspect-square w-6 md:w-12" />
+		</Button>
+	</div>
 </nav>
 
 <div class="container relative mx-auto mt-6 p-4 md:p-6">
