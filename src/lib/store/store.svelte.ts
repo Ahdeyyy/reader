@@ -31,6 +31,7 @@ export async function getCatalogueStore() {
 
                 }
             }
+
         },
 
         remove: async (item: Catalogue) => {

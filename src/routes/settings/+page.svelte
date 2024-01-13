@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { addToast } from '$lib/components/custom/toast';
 	import { getCatalogueStore, type CatalogueStore } from '$lib/store/store.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -19,8 +20,17 @@
 
 	async function addCatalogue(input: string) {
 		if (!input) return;
-		await catalogueStore?.add({
+		if (!catalogueStore) return;
+		const status = await catalogueStore.add({
 			title: input
+		});
+
+		addToast({
+			data: {
+				title: status.status,
+				description: status.message,
+				color: status.status === 'success' ? 'green-500' : 'red-500'
+			}
 		});
 	}
 
@@ -31,13 +41,27 @@
 			type: 'warning'
 		});
 		if (!confirmed) return;
-		await catalogueStore?.remove(catalogue);
-		// TODO: confirmation toast
+		if (!catalogueStore) return;
+		const status = await catalogueStore.remove(catalogue);
+		addToast({
+			data: {
+				title: status.status,
+				description: status.message,
+				color: status.status === 'success' ? 'green-500' : 'red-500'
+			}
+		});
 	}
 	async function editCatalogue(catalogue: Catalogue) {
 		if (!catalogue.title) return;
-		await catalogueStore?.edit(catalogue);
-		// TODO: confirmation toast
+		if (!catalogueStore) return;
+		const status = await catalogueStore?.edit(catalogue);
+		addToast({
+			data: {
+				title: status.status,
+				description: status.message,
+				color: status.status === 'success' ? 'green-500' : 'red-500'
+			}
+		});
 	}
 </script>
 
