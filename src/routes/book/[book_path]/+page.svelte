@@ -78,8 +78,28 @@
 	}
 
 	const rtl = false;
-	const goLeft = rtl ? () => rendition.next() : () => rendition.prev();
-	const goRight = rtl ? () => rendition.prev() : () => rendition.next();
+
+	const goLeft = () => {
+		if (rtl) {
+			rendition.next();
+			// top of the page
+		} else {
+			rendition.prev();
+		}
+
+		// rendition.display(rendition.currentLocation().href);
+	};
+
+	const goRight = () => {
+		if (rtl) {
+			rendition.prev();
+		} else {
+			rendition.next();
+		}
+
+		// rendition.display(rendition.currentLocation().href);
+	};
+
 	const onwheel = debounce(
 		(event: WheelEvent) => {
 			const { deltaX, deltaY } = event;
