@@ -51,10 +51,6 @@ export async function getCatalogueStore() {
 
                 }
             }
-
-            console.log(result);
-
-
             if (result.rowsAffected === 1) {
                 value.splice(indexOfCatalogue(value, item), 1);
                 return {
@@ -109,7 +105,7 @@ export async function getBookStore() {
                 }
             }
             const result = await db
-                .execute("INSERT INTO books (title, author, cover, description, url, catalogue_id) VALUES ($1, $2, $3, $4, $5, $6)", [item.title, item.author, item.cover, item.description, item.url, item.catalogue_id]);
+                .execute("INSERT INTO books (title, author,  description, url, catalogue_id) VALUES ($1, $2, $3, $4, $5)", [item.title, item.author, item.description, item.url, item.catalogue_id]);
             if (result.rowsAffected === 1) {
                 value.push(item);
                 return {
@@ -130,6 +126,7 @@ export async function getBookStore() {
             const result = await db.execute("DELETE FROM books WHERE id=$1", [item.id]);
             if (result.rowsAffected === 1) {
                 value.splice(indexOfBookCard(value, item), 1);
+
                 return {
                     status: "success",
                     message: "Book removed"
@@ -179,40 +176,11 @@ function indexOfCatalogue(catalogues: Catalogue[], catalogue: Catalogue) {
     return -1;
 }
 
-export async function urlImageToBlob(url: string) {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    console.log(blob);
-    const t = await blob.text();
-    console.log(new Blob([t], { type: "image/jpeg" }));
-
-    // console.log(await blob.text());
-    return await blob.text();
-
-}
-
-export function blobToUrlImage(blob: string) {
-
-    const blob2 = new Blob([blob], { type: "image/jpeg" });
 
 
-
-    // console.log(blob2);
-    try {
-        const url = URL.createObjectURL(blob2);
-        // console.log(url);
-        return url;
-    } catch (e) {
-        console.error(e);
-        return "";
-    }
-}
 
 export async function getBookImgUrl(book_path: string) {
-
-
     const path = fixUrl(book_path);
-
     const book = new Book(convertFileSrc(path));
     const cover = await book.coverUrl();
     if (cover) {
@@ -221,8 +189,6 @@ export async function getBookImgUrl(book_path: string) {
     } else {
         return "";
     }
-
-
 
 }
 export function fixUrl(url: string) {

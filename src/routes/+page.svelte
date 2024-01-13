@@ -4,7 +4,7 @@
 	import * as Tabs from '$lib/components/ui/tabs';
 	import * as Card from '$lib/components/ui/card';
 	import * as Dialog from '$lib/components/ui/dialog';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { Button } from '$lib/components/ui/button';
 	import { open } from '@tauri-apps/api/dialog';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 	import { Skeleton } from '$lib/components/ui/skeleton';
@@ -20,15 +20,9 @@
 		getBookImgUrl,
 		fixUrl
 	} from '$lib/store/store.svelte';
-	import type { BookCard, Catalogue } from '$lib/store/types';
+	import type { BookCard } from '$lib/store/types';
 	import { addToast } from '$lib/components/custom/toast';
 	import SearchCatalogue from '$lib/components/custom/searchCatalogue.svelte';
-
-	type ToastData = {
-		title: string;
-		description: string;
-		color: string;
-	};
 
 	let bookStore: Awaited<BookStore> | undefined = $state(undefined);
 	let catalogueStore: Awaited<CatalogueStore> | undefined = $state(undefined);
@@ -75,7 +69,6 @@
 
 		if (file_path) {
 			const t_file_path = convertFileSrc(file_path as string);
-
 			const epub_book = new Book(t_file_path);
 			const book_cover = await epub_book.coverUrl();
 			const book_url = new URL(t_file_path).pathname;
@@ -84,7 +77,6 @@
 			const book: BookCard = {
 				title: metadata.title,
 				author: metadata.creator,
-				cover: book_cover ?? '',
 				description: metadata.description,
 				url: book_url,
 				catalogue_id: catalogue_id

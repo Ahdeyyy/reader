@@ -1,15 +1,11 @@
 <script lang="ts">
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 	import { Book, type NavItem } from 'epubjs';
-	import ePub from 'epubjs';
 	import type { Location, RenditionOptions } from 'epubjs/types/rendition';
-	import { Slider } from '$lib/components/ui/slider';
 	import ReaderNav from '$lib/components/custom/readerNav.svelte';
 	import { debounce } from '$lib/utils.js';
-	import * as Sheet from '$lib/components/ui/sheet';
 	import { ChevronLeft, ChevronRight } from 'radix-icons-svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { setContext } from 'svelte';
 
 	type Flow = 'auto' | 'paginated' | 'scrolled-doc' | 'scrolled' | undefined;
 

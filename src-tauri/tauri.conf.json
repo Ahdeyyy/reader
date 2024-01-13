@@ -8,7 +8,7 @@
 		"withGlobalTauri": true
 	},
 	"package": {
-		"productName": "reader",
+		"productName": "svelte epub reader",
 		"version": "0.1.0"
 	},
 	"tauri": {
@@ -22,7 +22,7 @@
 			},
 			"fs": {
 				"all": true,
-				"scope": ["*", "C:\\Users\\ahdey\\Downloads\\Telegram Desktop\\*"]
+				"scope": ["*"]
 			},
 			"dialog": {
 				"all": true
@@ -43,7 +43,7 @@
 				"icons/icon.icns",
 				"icons/icon.ico"
 			],
-			"identifier": "com.tauri.dev",
+			"identifier": "com.svelte-epub-reader.dev",
 			"longDescription": "",
 			"macOS": {
 				"entitlements": null,
@@ -72,7 +72,7 @@
 				"fullscreen": false,
 				"height": 600,
 				"resizable": true,
-				"title": "reader",
+				"title": "epub reader",
 				"width": 800
 			}
 		]

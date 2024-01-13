@@ -13,7 +13,6 @@ export const migrate = async () => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
             author TEXT NOT NULL,
-            cover BLOB ,
             description TEXT NOT NULL,
             url TEXT NOT NULL,
             catalogue_id INTEGER NOT NULL
