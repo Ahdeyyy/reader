@@ -5,3 +5,5 @@ export const load = (async ({ params }) => {
         path: params.book_path,
     };
 }) satisfies PageLoad;
+
+export const prerender = false;
