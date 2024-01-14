@@ -46,12 +46,13 @@
 								on:click={async () => {
 									book.rendition.display(chapter.href);
 								}}
+								class="font-semibold"
 							>
 								{chapter.label}
 							</Button>
 							<ul>
 								{#each chapter.subitems || [] as item}
-									<li>
+									<li class="px-6">
 										<Button
 											variant="link"
 											on:click={async () => {
@@ -60,6 +61,20 @@
 										>
 											{item.label}
 										</Button>
+
+										{#each item.subitems || [] as subitem}
+											<li class="px-8">
+												<Button
+													variant="link"
+													on:click={async () => {
+														book.rendition.display(subitem.href);
+													}}
+													class="text-sm"
+												>
+													{subitem.label}
+												</Button>
+											</li>
+										{/each}
 									</li>
 								{/each}
 							</ul>
