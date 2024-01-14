@@ -62,7 +62,7 @@
 				placeholder="search for a book"
 				on:input={search}
 			/>
-			<section class="grid gap-3">
+			<section class="grid max-h-[60svh] gap-3 overflow-y-scroll">
 				{#each filtered_books as book}
 					<article class="flex w-full items-center justify-between gap-4 p-2">
 						<!-- {#await getBookImgUrl(book.url)}

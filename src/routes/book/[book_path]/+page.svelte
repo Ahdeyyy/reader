@@ -11,7 +11,9 @@
 
 	const { data } = $props();
 	const { path } = data;
-	let flow: Flow = $state('scrolled-doc');
+	const prevFlow = localStorage.getItem(`${path}-flow`);
+	let flow: Flow = $state((prevFlow as Flow) || 'auto');
+
 	// setContext('flow', flow);
 
 	// console.log(data);
@@ -192,7 +194,7 @@
 </script>
 
 {#if toc.length > 0}
-	<ReaderNav {book} tableOfContents={toc} bind:flow>
+	<ReaderNav {path} {book} tableOfContents={toc} bind:flow>
 		<main class="relative max-h-[100vh] max-w-[100vw] overflow-x-clip">
 			<Button
 				on:click={goLeft}

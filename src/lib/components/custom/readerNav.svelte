@@ -15,10 +15,11 @@
 	import { ArrowLeft } from 'radix-icons-svelte';
 	import type { Snippet } from 'svelte';
 
-	let { tableOfContents, book, flow, children } = $props<{
+	let { tableOfContents, book, flow, path, children } = $props<{
 		tableOfContents: NavItem[];
 		children: Snippet;
 		flow: 'auto' | 'paginated' | 'scrolled-doc' | 'scrolled' | undefined;
+		path: string;
 		book: Book;
 	}>();
 
@@ -95,26 +96,13 @@
 				<Sheet.Header>
 					<Sheet.Title>Settings</Sheet.Title>
 				</Sheet.Header>
-				<!-- <RadioGroup.Root bind:value={flow}>
-					<div class="flex items-center space-x-2">
-						<RadioGroup.Item value="auto" id="auto" />
-						<Label for="auto">auto</Label>
-					</div>
-					<div class="flex items-center space-x-2">
-						<RadioGroup.Item value="paginated" id="paginated" />
-						<Label for="paginated">paginated</Label>
-					</div>
-					<div class="flex items-center space-x-2">
-						<RadioGroup.Item value="scrolled-doc" id="scrolled-doc" />
-						<Label for="scrolled-doc">scrolled doc</Label>
-					</div>
-				</RadioGroup.Root> -->
 
 				<div class="mb-4 mt-4 grid grid-cols-3 gap-3">
 					<Button
 						variant="ghost"
 						on:click={() => {
 							flow = 'auto';
+							localStorage.setItem(`${path}-flow`, 'auto');
 						}}
 						class={flow === 'auto' ? 'ring-2' : ''}
 					>
@@ -124,6 +112,7 @@
 						variant="ghost"
 						on:click={() => {
 							flow = 'paginated';
+							localStorage.setItem(`${path}-flow`, 'paginated');
 						}}
 						class={flow === 'paginated' ? 'ring-2' : ''}
 					>
@@ -133,6 +122,7 @@
 						variant="ghost"
 						on:click={() => {
 							flow = 'scrolled-doc';
+							localStorage.setItem(`${path}-flow`, 'scrolled-doc');
 						}}
 						class={flow === 'scrolled-doc' ? 'ring-2' : ''}
 					>
