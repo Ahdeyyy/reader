@@ -1,6 +1,6 @@
 # svelte epub reader
 
-A simple epub reader built with svelte, epub.js, tailwindcss, shadcn-svelte and tauri.
+An epub reader built with svelte for the ui , epub.js for rendering the epub, tailwindcss for styling the ui, shadcn-svelte as a component library and tauri for bundling the sveltekit app to a cross platform executable.
 
 ## Features
 
@@ -9,3 +9,9 @@ A simple epub reader built with svelte, epub.js, tailwindcss, shadcn-svelte and 
 - [ ] epub bookmarks
 - [ ] epub annotations
 - [ ] page numbers
+
+
+
+## Todo
+
+- [ ] Store cover image for each book stored with rust epubrs
