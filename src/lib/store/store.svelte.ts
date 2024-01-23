@@ -1,8 +1,10 @@
 import Database, { type QueryResult } from "tauri-plugin-sql-api";
 import type { BookCard, Catalogue } from "./types";
 import { db_path } from "./types";
-import { Book } from "epubjs";
+// import { Book } from "epubjs";
 import { convertFileSrc } from "@tauri-apps/api/tauri";
+import { appDataDir } from '@tauri-apps/api/path';
+import { exists } from "@tauri-apps/api/fs";
 
 
 
@@ -179,16 +181,37 @@ function indexOfCatalogue(catalogues: Catalogue[], catalogue: Catalogue) {
 
 
 
-export async function getBookImgUrl(book_path: string) {
-    const path = fixUrl(book_path);
-    const book = new Book(convertFileSrc(path));
-    const cover = await book.coverUrl();
-    if (cover) {
+export async function getBookImgUrl(book_title: string) {
+    const appDataDirPath = await appDataDir();
+    const normalized_title = book_title.replace("<", "")
+        .replaceAll("\"", "")
+        .replaceAll(">", "")
+        .replaceAll("?", "")
+        .replaceAll("|", "")
+        .replaceAll("\\", "")
+        .replaceAll("/", "")
+        .replaceAll(":", "")
+        ;
 
-        return cover;
+
+    const cover_path = appDataDirPath + "cover\\" + normalized_title + ".png";
+    const cover_exists = await exists(cover_path);
+
+    if (cover_exists) {
+        return convertFileSrc(cover_path);
     } else {
         return "";
     }
+
+    // const path = fixUrl(book_path);
+    // const book = new Book(convertFileSrc(path));
+    // const cover = await book.coverUrl();
+    // if (cover) {
+
+    //     return cover;
+    // } else {
+    //     return "";
+    // }
 
 }
 export function fixUrl(url: string) {

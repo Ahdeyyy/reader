@@ -23,6 +23,7 @@
 	import type { BookCard } from '$lib/store/types';
 	import { addToast } from '$lib/components/custom/toast';
 	import SearchCatalogue from '$lib/components/custom/searchCatalogue.svelte';
+	import { invoke } from '@tauri-apps/api/tauri';
 
 	let bookStore: Awaited<BookStore> | undefined = $state(undefined);
 	let catalogueStore: Awaited<CatalogueStore> | undefined = $state(undefined);
@@ -70,7 +71,6 @@
 		if (file_path) {
 			const t_file_path = convertFileSrc(file_path as string);
 			const epub_book = new Book(t_file_path);
-			const book_cover = await epub_book.coverUrl();
 			const book_url = new URL(t_file_path).pathname;
 			const metadata = await epub_book.loaded.metadata;
 
@@ -83,6 +83,9 @@
 			};
 
 			const status = await bookStore!.add(book);
+			if (status.status === 'success') {
+				await invoke('generate_image', { path: file_path as string });
+			}
 			addToast({
 				data: {
 					title: status.status,
@@ -188,7 +191,7 @@
 									class="relative flex h-96 flex-col items-center gap-3 self-center p-4 text-center"
 								>
 									<Card.Content>
-										{#await getBookImgUrl(book.url)}
+										{#await getBookImgUrl(book.title)}
 											<Skeleton class="mx-auto mb-4 h-40 w-32" />
 										{:then url}
 											{#if url}
