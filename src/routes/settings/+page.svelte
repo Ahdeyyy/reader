@@ -3,8 +3,8 @@
 	import { getCatalogueStore, type CatalogueStore } from '$lib/store/store.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
-	import { fly } from 'svelte/transition';
-	import { Cross1, Trash } from 'radix-icons-svelte';
+
+	import { Cross1, Trash, Pencil1, Check } from 'radix-icons-svelte';
 	import { confirm } from '@tauri-apps/api/dialog';
 	import type { Catalogue } from '$lib/store/types';
 	import HomeNav from '$lib/components/custom/homeNav.svelte';
@@ -15,7 +15,6 @@
 		catalogueStore = store;
 	});
 
-	let catalogueInput = $state(false);
 	let catalogueTitle = $state('');
 
 	async function addCatalogue(input: string) {
@@ -35,7 +34,9 @@
 	}
 
 	async function removeCatalogue(catalogue: Catalogue) {
-		if (catalogue.title === 'recent' && catalogue.id === 1) return; // TODO: toast (cannot remove recent catalogue
+		if (catalogue.title === 'recent' && catalogue.id === 1) return;
+		// TODO: toast (cannot remove recent catalogue
+
 		const confirmed = await confirm('This action cannot be reverted. Are you sure?', {
 			title: 'Remove catalogue',
 			type: 'warning'
@@ -71,74 +72,52 @@
 		<section class="grid gap-4">
 			<h2 class="text-lg font-semibold">Catalogues</h2>
 			<div class="w-full">
-				{#if !catalogueInput}
-					<div
-						class="w-1/5"
-						in:fly={{ x: -150, delay: 350, duration: 300 }}
-						out:fly={{ x: -150, duration: 300 }}
-					>
-						<Button
-							class="w-full"
-							on:click={() => {
-								catalogueInput = true;
-							}}
-							variant="default"
-						>
-							Create
+				<form
+					class="flex w-3/5 justify-evenly gap-4"
+					on:submit|preventDefault={async () => {
+						await addCatalogue(catalogueTitle);
+						catalogueTitle = '';
+					}}
+				>
+					<Input
+						autofocus={true}
+						bind:value={catalogueTitle}
+						placeholder="Enter title"
+						type="text"
+					/>
+					<div class="">
+						<Button type="submit" variant="default">
+							<Check class="aspect-square w-6 md:w-8" />
 						</Button>
 					</div>
-				{/if}
-				{#if catalogueInput}
-					<form
-						in:fly={{ x: 150, delay: 350, duration: 300 }}
-						out:fly={{ x: 150, duration: 300 }}
-						class="flex w-3/5 justify-evenly gap-4"
-						on:submit|preventDefault={async () => {
-							await addCatalogue(catalogueTitle);
-							catalogueInput = false;
-						}}
-					>
-						<Input
-							autofocus={true}
-							bind:value={catalogueTitle}
-							placeholder="Enter title"
-							type="text"
-						/>
-						<div class="flex w-1/5 justify-around gap-2">
-							<Button
-								type="reset"
-								on:click={() => {
-									catalogueInput = false;
-								}}
-								variant="default"
-							>
-								<Cross1 class="aspect-square w-6 md:w-8" />
-							</Button>
-							<Button type="submit" variant="default">Add</Button>
-						</div>
-					</form>
-				{/if}
+				</form>
 			</div>
 			{#each catalogueStore?.value || [] as catalogue}
-				<article class="flex w-3/5 justify-between gap-2 rounded-md px-5 py-2 shadow-md">
+				<article class="flex w-3/5 justify-between gap-2 rounded px-5 py-2 shadow-md">
 					<Input
 						type="text"
 						name="catalogue-{catalogue.id}"
 						bind:value={catalogue.title}
 						id="catalogue-{catalogue.title}"
+						class="h-full py-2"
+						disabled={catalogue.id === 1 && catalogue.title === 'recent'}
 					/>
 					<Button
 						on:click={async () => {
 							await editCatalogue(catalogue);
 						}}
-						variant="default">Edit</Button
+						variant="default"
+						disabled={catalogue.id === 1 && catalogue.title === 'recent'}
 					>
+						<Pencil1 class="aspect-square w-6 md:h-8" />
+					</Button>
 					<div>
 						<Button
 							on:click={async () => {
 								await removeCatalogue(catalogue);
 							}}
-							variant="destructive"
+							variant={catalogue.id === 1 ? 'ghost' : 'destructive'}
+							disabled={catalogue.id === 1 && catalogue.title === 'recent'}
 						>
 							<Trash class="aspect-square w-6 md:w-8" />
 						</Button>

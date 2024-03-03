@@ -2,10 +2,23 @@
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 	import { Book, type NavItem } from 'epubjs';
 	import type { Location, RenditionOptions } from 'epubjs/types/rendition';
+	// import { Slider } from '$lib/components/ui/slider';
 	import ReaderNav from '$lib/components/custom/readerNav.svelte';
 	import { debounce } from '$lib/utils.js';
 	import { ChevronLeft, ChevronRight } from 'radix-icons-svelte';
 	import { Button } from '$lib/components/ui/button';
+	// import Annotations, { Annotation } from 'epubjs/types/annotations.js';
+
+	const getSelections = () =>
+		rendition.getContents().map((contents) => contents.window.getSelection());
+
+	function clearSelection() {
+		getSelections().forEach((s) => s.removeAllRanges());
+	}
+
+	function selectByCfi(cfi) {
+		getSelections().forEach((s) => s.addRange(rendition.getRange(cfi)));
+	}
 
 	type Flow = 'auto' | 'paginated' | 'scrolled-doc' | 'scrolled' | undefined;
 
@@ -21,20 +34,18 @@
 
 	const book = new Book(convertFileSrc(path), {});
 
-	const renditionOpts: RenditionOptions = $derived(
-		(() => {
-			return {
-				flow,
-				width: '100%',
-				height: '100%',
-				allowScriptedContent: true
-			};
-		})()
-	);
+	const renditionOpts: RenditionOptions = {
+		flow,
+		width: '100%',
+		height: '100%',
+		allowScriptedContent: true
+	};
 
 	let rendition = $state(book.renderTo('area', renditionOpts));
 
 	const location = localStorage.getItem(`${path}-location`);
+	let pages = $state([]);
+
 	let toc = $state<NavItem[]>([]);
 
 	// let current_page: number = $state(0);
@@ -49,6 +60,19 @@
 	}
 
 	async function epub_setup() {
+		const debounce = (f, wait, immediate) => {
+			let timeout;
+			return (...args) => {
+				const later = () => {
+					timeout = null;
+					if (!immediate) f(...args);
+				};
+				const callNow = immediate && !timeout;
+				clearTimeout(timeout);
+				timeout = setTimeout(later, wait);
+				if (callNow) f(...args);
+			};
+		};
 		// const rendition = book.renderTo('area', renditionOpts);
 		await book.locations.generate(1024); // Example using 1024 characters per page
 		book.loaded.navigation.then((data) => {
@@ -122,8 +146,11 @@
 	$effect(() => {
 		(async () => {
 			await epub_setup();
+			// console.log(book.pageList);
+			// await generate_pages();
 		})();
 
+		// generate_pages();
 		// console.log(flow);
 		rendition.flow(flow as string);
 
@@ -158,7 +185,7 @@
 		// 	console.log('wheeling');
 		// 	onwheel(event);
 		// });
-		// document.onwheel = onwheel;
+		document.onwheel = onwheel;
 
 		// return () => {
 		// 	document.removeEventListener('keyup', async (event: KeyboardEvent) => {
@@ -199,20 +226,20 @@
 			<Button
 				on:click={goLeft}
 				variant="secondary"
-				class=" absolute left-4 top-1/3 z-50 px-4 py-14 opacity-25 transition-all duration-500 hover:opacity-100"
+				class=" absolute left-1 top-1/3 z-50 px-4 py-14 opacity-25 transition-all duration-500 hover:opacity-100"
 			>
 				<ChevronLeft class="h-6 w-6 " />
 			</Button>
 			<Button
 				on:click={goRight}
 				variant="secondary"
-				class=" absolute right-4 top-1/3 z-50 px-4 py-14 opacity-25 transition-all duration-500 hover:opacity-100"
+				class=" absolute right-1 top-1/3 z-50 px-4 py-14 opacity-25 transition-all duration-500 hover:opacity-100"
 			>
 				<ChevronRight class="h-6 w-6" />
 			</Button>
 			<section class="flex h-[89lvh] w-[85lwh] justify-center overflow-x-clip" id="area"></section>
 
-			<!-- <Slider value={[current_page]} max={100} step={1} /> -->
+			<!-- <Slider value={[current_page]} max={100} step={0.1} /> -->
 		</main>
 	</ReaderNav>
 {/if}

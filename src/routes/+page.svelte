@@ -1,17 +1,21 @@
 <script lang="ts">
+	// TODO: function and type renames, need to be more descriptive
 	import { Book } from 'epubjs';
-	import { DotsVertical, Plus } from 'radix-icons-svelte';
+	import { Plus } from 'radix-icons-svelte';
 	import * as Tabs from '$lib/components/ui/tabs';
-	import * as Card from '$lib/components/ui/card';
+
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Button } from '$lib/components/ui/button';
 	import { open } from '@tauri-apps/api/dialog';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 	import { Skeleton } from '$lib/components/ui/skeleton';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+
 	import { confirm } from '@tauri-apps/api/dialog';
 
 	import HomeNav from '$lib/components/custom/homeNav.svelte';
+
+	import BookCardComponent from './bookCard.svelte';
+
 	import {
 		getBookStore,
 		getCatalogueStore,
@@ -24,6 +28,9 @@
 	import { addToast } from '$lib/components/custom/toast';
 	import SearchCatalogue from '$lib/components/custom/searchCatalogue.svelte';
 	import { invoke } from '@tauri-apps/api/tauri';
+
+	type DialogState = 'closed' | 'open' | 'opening';
+	let aboutDialogState: DialogState = $state<DialogState>('closed');
 
 	let bookStore: Awaited<BookStore> | undefined = $state(undefined);
 	let catalogueStore: Awaited<CatalogueStore> | undefined = $state(undefined);
@@ -113,33 +120,49 @@
 	}
 
 	let openDialog = $state(false);
-	async function openAbout(book_path: string) {
-		openDialog = true;
-		const book = new Book(convertFileSrc(fixUrl(book_path)));
-		const metadata = await book.loaded.metadata;
-		const cover_url = await book.coverUrl();
-		// console.log((await book.loaded.navigation).toc);
 
-		const description = metadata.description;
-		aboutBook.title = metadata.title;
-		aboutBook.cover_url = cover_url ?? '';
-		aboutBook.description = description;
-		aboutBook.author = metadata.creator;
-		aboutBook.publisher = metadata.publisher || 'Unknown';
-		aboutBook.url = book_path;
-		aboutBook.rights = metadata.rights || 'Unknown';
-		if (metadata.pubdate === '') {
-			aboutBook.year = 'Unknown';
-		} else {
-			const date = new Date(metadata.pubdate);
-			aboutBook.year =
-				date.getFullYear().toString() +
-				'-' +
-				(date.getMonth() + 1).toString() +
-				'-' +
-				date.getDate().toString();
+	async function openAbout(book_path: string) {
+		type About = {
+			title: string;
+			description: string;
+			author: string;
+			publisher: string;
+			date: string;
+			language: string;
+			rights: string;
+		};
+		try {
+			const about = (await invoke('get_book_about', { path: fixUrl(book_path) })) as About;
+			aboutBook.title = about.title;
+			aboutBook.description = about.description;
+			aboutBook.author = about.author;
+			aboutBook.publisher = about.publisher;
+			aboutBook.url = book_path;
+			aboutBook.rights = about.rights;
+
+			aboutBook.language = about.language;
+			if (about.date === '') {
+				aboutBook.year = 'Unknown';
+			} else {
+				const date = new Date(about.date);
+				aboutBook.year =
+					date.getFullYear().toString() +
+					'-' +
+					(date.getMonth() + 1).toString() +
+					'-' +
+					date.getDate().toString();
+			}
+		} catch (e) {
+			addToast({
+				data: {
+					title: 'Error',
+					description: e as string,
+					color: 'red-500'
+				}
+			});
 		}
-		aboutBook.language = metadata.language;
+
+		openDialog = true;
 	}
 
 	$effect(() => {
@@ -187,56 +210,7 @@
 						</div>
 						<div class="grid grid-cols-2 gap-3 md:grid-cols-2 lg:grid-cols-4">
 							{#each bookStore?.getByCatalogue(catalogue.id!) || [] as book}
-								<Card.Root
-									class="relative flex h-96 flex-col items-center gap-3 self-center p-4 text-center"
-								>
-									<Card.Content>
-										{#await getBookImgUrl(book.title)}
-											<Skeleton class="mx-auto mb-4 h-40 w-32" />
-										{:then url}
-											{#if url}
-												<img
-													class="mx-auto mb-4 aspect-[200/250] h-40 w-32 object-cover"
-													height="250"
-													width="200"
-													src={url}
-													alt="book cover"
-												/>
-											{:else}
-												<Skeleton class="mx-auto mb-4 h-40 w-32" />
-											{/if}
-										{:catch error}
-											<p>{error}</p>
-										{/await}
-
-										<h3 class="max-h-16 overflow-hidden text-balance text-center font-semibold">
-											{book.title}
-										</h3>
-										<p class="mt-1 text-sm text-gray-500">{book.author}</p>
-										<div class="absolute bottom-6 left-2 flex w-full justify-between p-4">
-											<Button variant="default" href="/book{book.url}" class="w-3/4">Read</Button>
-											<DropdownMenu.Root>
-												<DropdownMenu.Trigger>
-													<DotsVertical class="aspect-square w-6" />
-												</DropdownMenu.Trigger>
-												<DropdownMenu.Content>
-													<DropdownMenu.Group>
-														<DropdownMenu.Item
-															on:click={async () => {
-																await openAbout(book.url);
-															}}>About</DropdownMenu.Item
-														>
-														<DropdownMenu.Item
-															on:click={async () => {
-																await removeBook(book);
-															}}>Remove</DropdownMenu.Item
-														>
-													</DropdownMenu.Group>
-												</DropdownMenu.Content>
-											</DropdownMenu.Root>
-										</div>
-									</Card.Content>
-								</Card.Root>
+								<BookCardComponent {book} {removeBook} {openAbout}></BookCardComponent>
 							{:else}
 								<div class="flex gap-3 mt-8">
 									<p class="text-gray-400">No books in this catalogue</p>
@@ -266,17 +240,23 @@
 			</Dialog.Description>
 			<section>
 				<div class="grid grid-cols-2 gap-4 p-6">
-					{#if aboutBook.cover_url}
-						<img
-							class="mb-4 block aspect-[200/250] h-52 object-cover"
-							height="250"
-							width="200"
-							src={aboutBook.cover_url}
-							alt="book cover"
-						/>
-					{:else}
-						<Skeleton class=" mb-4 block aspect-[200/250] h-52" />
-					{/if}
+					{#await getBookImgUrl(aboutBook.title)}
+						<Skeleton class="mx-auto mb-4 h-52" />
+					{:then url}
+						{#if url}
+							<img
+								class="mx-auto mb-4 aspect-[200/250] h-52 object-cover"
+								height="250"
+								width="200"
+								src={url}
+								alt="book cover"
+							/>
+						{:else}
+							<Skeleton class="mx-auto mb-4 h-52" />
+						{/if}
+					{:catch error}
+						<p>{error}</p>
+					{/await}
 
 					<section>
 						<div class="flex flex-col gap-2">
